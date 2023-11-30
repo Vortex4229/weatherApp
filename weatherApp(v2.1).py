@@ -44,8 +44,8 @@ class myGUI:
         self.local_time_label = None
         self.return_button = None
 
+        self.file = open('recent_locations.txt', 'r')
         self.recent_locations = []
-        self.file = open('recent_locations.txt', 'r+')
 
         # home screen GUI
         self.label1 = tk.Label(self.root, text="Enter a City, Region, and Country:", font=('Arial', 18))
@@ -93,20 +93,21 @@ class myGUI:
             self.when_entered()
 
     def list_manipulation(self, city, country, region):
-        self.recent_locations.insert(0, str((city, region, country)))
-        self.file.truncate(0)
-        if len(self.recent_locations) > 3:
-            self.recent_locations.pop()
-            self.file.seek(0)
-            self.file.writelines(self.recent_locations)
-            self.file.flush()
-            return self.recent_locations
-        else:
-            self.file.seek(0)
-            self.file.writelines(self.recent_locations)
-            self.file.flush()
-            return self.recent_locations
+        if self.current_check:
+            return
+        if (city, region, country) == self.recent_locations[0]:
+            return
 
+        self.recent_locations.insert(0, str((city, region, country)))
+
+        with open('recent_locations.txt', 'w') as file:
+            if len(self.recent_locations) > 3:
+                self.recent_locations = self.recent_locations[:3]
+            for location in self.recent_locations:
+                file.write(location + '\n')
+
+        with open('recent_locations.txt', 'r') as file:
+            self.recent_locations = file.read().splitlines()
 
     # result GUI
     def when_entered(self):
